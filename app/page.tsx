@@ -444,6 +444,24 @@ export default function Home() {
     (typeof haulers)[0] | null
   >(null);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [clockInStatus, setClockInStatus] = useState<
+    "idle" | "loading" | "done" | "error"
+  >("idle");
+  const [employeeNumber, setEmployeeNumber] = useState<number | null>(null);
+
+  async function handleClockIn() {
+    if (clockInStatus === "loading" || clockInStatus === "done") return;
+    setClockInStatus("loading");
+    try {
+      const res = await fetch("/api/clock-in", { method: "POST" });
+      if (!res.ok) throw new Error("Request failed");
+      const data = await res.json();
+      setEmployeeNumber(data.count);
+      setClockInStatus("done");
+    } catch {
+      setClockInStatus("error");
+    }
+  }
   const [gateOpen, setGateOpen] = useState(false);
   const [gateStage, setGateStage] = useState<
     "idle" | "verifying" | "denied" | "granted"
@@ -1072,12 +1090,22 @@ export default function Home() {
                   Online
                 </p>
                 <p className="mt-3 font-mono text-xs text-lime-500/70">
-                  Ready to clock in...
+                  {clockInStatus === "done" && employeeNumber
+                    ? `Welcome aboard, NH-${String(employeeNumber).padStart(3, "0")}.`
+                    : clockInStatus === "loading"
+                      ? "Clocking in..."
+                      : clockInStatus === "error"
+                        ? "Network hiccup. Try again."
+                        : "Ready to clock in..."}
                 </p>
               </div>
 
-              <button className="mt-3 w-full bg-lime-300 py-3 text-sm font-black uppercase tracking-[0.2em] text-lime-950 shadow-inner transition hover:bg-lime-200 active:scale-[0.98]">
-                Clock In
+              <button
+                onClick={handleClockIn}
+                disabled={clockInStatus === "loading" || clockInStatus === "done"}
+                className="mt-3 w-full bg-lime-300 py-3 text-sm font-black uppercase tracking-[0.2em] text-lime-950 shadow-inner transition hover:bg-lime-200 active:scale-[0.98] disabled:opacity-70"
+              >
+                {clockInStatus === "done" ? "Clocked In" : "Clock In"}
               </button>
 
               <div className="mt-3 rotate-[-0.5deg] border border-black/20 bg-[#f3ead7] p-3 text-left text-black shadow-inner">
@@ -1089,7 +1117,16 @@ export default function Home() {
                 </p>
                 <div className="mt-2 border-t border-dashed border-black/20 pt-2 text-[11px] font-bold">
                   <p>Shift: Night</p>
-                  <p className="mt-0.5 text-amber-700">Status: Pending</p>
+                  <p
+                    className={`mt-0.5 ${
+                      clockInStatus === "done"
+                        ? "text-green-700"
+                        : "text-amber-700"
+                    }`}
+                  >
+                    Status:{" "}
+                    {clockInStatus === "done" ? "Clocked In" : "Pending"}
+                  </p>
                 </div>
                 <div className="mt-2 flex h-4 items-end gap-[2px]" aria-hidden="true">
                   {barcodeBars.map((w, i) => (
