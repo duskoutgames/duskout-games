@@ -551,6 +551,10 @@ export default function Home() {
             <p className="mt-4 text-sm text-gray-400">
               Everyone starts as a new hire. Scan in to begin your shift.
             </p>
+            <p className="mt-2 text-xs italic text-gray-600">
+              Scanners have a mind of their own. If you&apos;re denied, just
+              try again.
+            </p>
           </div>
 
           {/* Duskout Company Badge, tap to scan */}
