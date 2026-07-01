@@ -448,6 +448,27 @@ export default function Home() {
     "idle" | "loading" | "done" | "error"
   >("idle");
   const [employeeNumber, setEmployeeNumber] = useState<number | null>(null);
+  const [clockInTime, setClockInTime] = useState<number | null>(null);
+  const [clockOutStatus, setClockOutStatus] = useState<
+    "idle" | "done" | "never"
+  >("idle");
+  const [liveElapsed, setLiveElapsed] = useState("00:00");
+  const [finalElapsed, setFinalElapsed] = useState("00:00");
+
+  function formatElapsed(ms: number) {
+    const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  }
+
+  useEffect(() => {
+    if (!clockInTime || clockOutStatus !== "idle") return;
+    const interval = setInterval(() => {
+      setLiveElapsed(formatElapsed(Date.now() - clockInTime));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [clockInTime, clockOutStatus]);
 
   async function handleClockIn() {
     if (clockInStatus === "loading" || clockInStatus === "done") return;
@@ -458,9 +479,20 @@ export default function Home() {
       const data = await res.json();
       setEmployeeNumber(data.count);
       setClockInStatus("done");
+      setClockInTime(Date.now());
     } catch {
       setClockInStatus("error");
     }
+  }
+
+  function handleClockOut() {
+    if (clockOutStatus !== "idle") return;
+    if (!clockInTime) {
+      setClockOutStatus("never");
+      return;
+    }
+    setFinalElapsed(formatElapsed(Date.now() - clockInTime));
+    setClockOutStatus("done");
   }
   const [gateOpen, setGateOpen] = useState(false);
   const [gateStage, setGateStage] = useState<
@@ -2002,20 +2034,71 @@ export default function Home() {
               </p>
             </div>
 
-            {/* offline status readout, mirrors the hero terminal */}
+            {/* clock-out terminal, mirrors the hero terminal's status flow */}
             <div className="w-full max-w-xs border border-zinc-800 bg-zinc-950 p-4">
               <div className="flex items-center justify-between">
                 <p className="font-mono text-[10px] uppercase tracking-widest text-gray-500">
                   Shift Status
                 </p>
-                <span className="h-2 w-2 animate-pulse rounded-full bg-red-500/70" />
+                <span
+                  className={`h-2 w-2 animate-pulse rounded-full ${
+                    clockOutStatus === "done"
+                      ? "bg-red-500/70"
+                      : clockOutStatus === "never"
+                        ? "bg-amber-400/70"
+                        : clockInTime
+                          ? "bg-lime-400/70"
+                          : "bg-gray-600/70"
+                  }`}
+                />
               </div>
-              <p className="mt-2 font-mono text-sm font-bold text-red-400/80">
-                Offline
-              </p>
-              <p className="mt-1 font-mono text-[11px] text-gray-600">
-                See you next shift.
-              </p>
+
+              {clockOutStatus === "idle" && (
+                <>
+                  <p
+                    className={`mt-2 font-mono text-sm font-bold ${
+                      clockInTime ? "text-lime-400" : "text-gray-500"
+                    }`}
+                  >
+                    {clockInTime ? "On Shift" : "Not Clocked In"}
+                  </p>
+                  <p className="mt-1 font-mono text-[11px] text-gray-600">
+                    {clockInTime
+                      ? `Time on shift: ${liveElapsed}`
+                      : "Clock in up top to start your shift."}
+                  </p>
+                </>
+              )}
+
+              {clockOutStatus === "done" && (
+                <>
+                  <p className="mt-2 font-mono text-sm font-bold text-red-400/80">
+                    Offline
+                  </p>
+                  <p className="mt-1 font-mono text-[11px] text-gray-600">
+                    Shift complete. Total time: {finalElapsed}.
+                  </p>
+                </>
+              )}
+
+              {clockOutStatus === "never" && (
+                <>
+                  <p className="mt-2 font-mono text-sm font-bold text-amber-400">
+                    Unrecognized
+                  </p>
+                  <p className="mt-1 font-mono text-[11px] text-gray-600">
+                    You never technically clocked in. HR has been notified.
+                  </p>
+                </>
+              )}
+
+              <button
+                onClick={handleClockOut}
+                disabled={clockOutStatus !== "idle"}
+                className="mt-3 w-full border border-zinc-700 bg-zinc-900 py-2 text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 transition hover:border-red-500/40 hover:text-red-400 disabled:pointer-events-none disabled:opacity-60"
+              >
+                {clockOutStatus === "idle" ? "Clock Out" : "Clocked Out"}
+              </button>
             </div>
 
             <nav
