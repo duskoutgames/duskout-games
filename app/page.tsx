@@ -67,7 +67,7 @@ const directoryIcons: Record<string, ReactNode> = {
 const lockedLocations = [
   { file: "Location File #071", name: "Shipwreck", threat: "?????" },
   { file: "Location File #133", name: "Carnival", threat: "?????" },
-  { file: "Location File #240", name: null, threat: "?????" },
+  { file: "Location File #198", name: "Hospital", threat: "?????" },
 ];
 
 const residents = [
@@ -1364,6 +1364,57 @@ export default function Home() {
             ))}
           </div>
 
+          {/* House Rules — headline differentiator */}
+          <div className="mt-16 border border-red-500/25 bg-red-950/10 p-8 md:p-10">
+            <p className="text-xs font-black uppercase tracking-[0.4em] text-red-400">
+              The Fine Print
+            </p>
+            <h3
+              className={`${anton.className} mt-3 text-3xl uppercase leading-[0.95] text-red-100 md:text-4xl`}
+            >
+              Every Entity Has House Rules.
+              <br />
+              Break Them, Pay The Price.
+            </h3>
+            <p className="mt-5 max-w-2xl text-sm leading-relaxed text-gray-400 md:text-base">
+              It&apos;s never just a chase. Every entity in a Night Haulers
+              location has its own rule &mdash; a specific thing you&apos;re
+              not supposed to do. Interrupt the wrong performance. Hold the
+              wrong gaze too long. Make the wrong sound in the wrong ward.
+              Break it, and the punishment is never generic. It&apos;s
+              personal.
+            </p>
+
+            <div className="mt-8 grid gap-3 sm:grid-cols-3">
+              {[
+                {
+                  who: "The Ringmaster",
+                  rule: "Don't interrupt the show, or you're the next act.",
+                },
+                {
+                  who: "The Head Nurse",
+                  rule: "Don't hold her gaze.",
+                },
+                {
+                  who: "Code Blue",
+                  rule: "Trigger it, and every ghost in the ward comes running.",
+                },
+              ].map((item) => (
+                <div
+                  key={item.who}
+                  className="border border-red-400/20 bg-black/40 p-4"
+                >
+                  <p className="text-xs font-black uppercase tracking-wide text-red-300">
+                    {item.who}
+                  </p>
+                  <p className="mt-2 text-xs leading-relaxed text-gray-400">
+                    {item.rule}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
           <a
             href="https://store.steampowered.com/"
             target="_blank"
@@ -1645,7 +1696,7 @@ export default function Home() {
             is normal.
           </p>
 
-          <div className="mt-12 grid gap-6 md:grid-cols-5">
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
             {haulers.map((hauler, index) => (
               <button
                 key={hauler.name}
@@ -1686,6 +1737,45 @@ export default function Home() {
                 </div>
               </button>
             ))}
+
+            {/* 6th Hauler, proposed and not yet finalized */}
+            <div className="relative rotate-[1deg] border border-yellow-900/40 bg-[#b98b45] p-3 text-left text-black shadow-2xl opacity-90">
+              <div className="border border-black/20 bg-[#f3ead7] p-4">
+                <p className="text-xs font-black uppercase tracking-[0.25em] text-purple-700">
+                  Employee File
+                </p>
+
+                <div className="relative mt-5 flex h-40 items-center justify-center overflow-hidden border border-black/20 bg-black/10">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                    className="h-14 w-14 text-black/25"
+                    aria-hidden="true"
+                  >
+                    <circle cx="12" cy="8" r="3.5" />
+                    <path d="M5 21c1.2-4 4-6 7-6s5.8 2 7 6" />
+                  </svg>
+                </div>
+
+                <h3 className={`${bangers.className} mt-5 text-3xl uppercase text-black/40`}>
+                  Sparks
+                </h3>
+
+                <p className="mt-1 text-xs font-black uppercase tracking-[0.15em] text-black/40">
+                  Frontline
+                </p>
+
+                <p className="mt-3 text-xs italic text-black/40">
+                  &ldquo;Proposal pending management approval.&rdquo;
+                </p>
+
+                <p className="mt-4 inline-block border border-black/20 bg-black/5 px-2 py-0.5 text-[10px] font-black uppercase tracking-widest text-black/40">
+                  Coming Soon
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
